@@ -77,6 +77,9 @@ function Card({ name, url, handleReplace, handleShuffle }) {
 
 function App() {
   const [pokemon, setPokemon] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [score, setScore] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
 
   useEffect(() => {
     const randomPokemon = getRandomItemsFromArray(resourceList, 10);
@@ -90,7 +93,18 @@ function App() {
     setPokemon((prev) => prev.map((p) => (p.name === name ? replacement : p)));
   }
 
-  function shufflePokemon() {
+  function shufflePokemon(name) {
+    if (history.includes(name)) {
+      if (score > bestScore) {
+        setBestScore(score);
+      }
+      setScore(0);
+      setHistory([]);
+    } else {
+      setHistory([...history, name]);
+      setScore((score) => score + 1);
+    }
+
     setPokemon(getRandomItemsFromArray(pokemon));
   }
 
@@ -102,7 +116,7 @@ function App() {
           name={name}
           url={url}
           handleReplace={() => replacePokemon(name)}
-          handleShuffle={() => shufflePokemon()}
+          handleShuffle={() => shufflePokemon(name)}
         />
       ))}
     </div>
