@@ -27,10 +27,42 @@ function getRandomItemsFromArray(array, count = 10) {
 }
 
 function Card({ name, url }) {
-  // TODO...
+  const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function fetchImage() {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+
+        const json = await response.json();
+        const image = json.sprites?.other?.["official-artwork"]?.front_default;
+
+        if (!image) {
+          console.error("No image found. Replacing pokemon...");
+          // TODO...
+        } else if (!ignore) {
+          setImage(image);
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
+    fetchImage();
+
+    return () => {
+      ignore = true;
+    };
+  }, [url]);
+
   return (
     <div className="card">
-      <img src="" alt={name} />
+      <img src={image} alt={name} />
     </div>
   );
 }
