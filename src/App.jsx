@@ -26,7 +26,7 @@ function getRandomItemsFromArray(array, count = 10) {
   return result;
 }
 
-function Card({ name, url, handleReplace }) {
+function Card({ name, url, handleReplace, handleShuffle }) {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ function Card({ name, url, handleReplace }) {
   }, [name, url, handleReplace]);
 
   return (
-    <div className="card">
+    <div className="card" onClick={handleShuffle}>
       {image ? <img src={image} alt={name} /> : <p>Loading...</p>}
     </div>
   );
@@ -90,6 +90,10 @@ function App() {
     setPokemon((prev) => prev.map((p) => (p.name === name ? replacement : p)));
   }
 
+  function shufflePokemon() {
+    setPokemon(getRandomItemsFromArray(pokemon));
+  }
+
   return (
     <div className="pokemon-cards">
       {pokemon.map(({ name, url }) => (
@@ -98,6 +102,7 @@ function App() {
           name={name}
           url={url}
           handleReplace={() => replacePokemon(name)}
+          handleShuffle={() => shufflePokemon()}
         />
       ))}
     </div>
