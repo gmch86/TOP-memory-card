@@ -2,16 +2,16 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 // Fetch pokemon resource list
-if (!sessionStorage.getItem("resourceList")) {
+if (!localStorage.getItem("resourceList")) {
   console.log("Fetching pokemon data...");
   await fetch("https://pokeapi.co/api/v2/pokemon?limit=-1")
     .then((res) => res.json())
     .then(({ results }) => {
-      sessionStorage.setItem("resourceList", JSON.stringify(results));
+      localStorage.setItem("resourceList", JSON.stringify(results));
     });
 }
 
-const resourceList = JSON.parse(sessionStorage.getItem("resourceList"));
+const resourceList = JSON.parse(localStorage.getItem("resourceList"));
 
 function getRandomItemsFromArray(array, count = 10) {
   const result = [];
@@ -26,7 +26,7 @@ function getRandomItemsFromArray(array, count = 10) {
   return result;
 }
 
-function Card({ name, url }) {
+function Card({ name, url, handleReplace }) {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
@@ -50,8 +50,8 @@ function Card({ name, url }) {
         const image = json.sprites?.other?.["official-artwork"]?.front_default;
 
         if (!image) {
-          console.error("No image found. Replacing pokemon...");
-          // TODO...
+          console.error("No image found. Replacing Pokemon...");
+          handleReplace();
         } else if (!ignore) {
           localStorage.setItem(`pokemonImage-${name}`, image);
           setImage(image);
@@ -66,11 +66,11 @@ function Card({ name, url }) {
     return () => {
       ignore = true;
     };
-  }, [name, url]);
+  }, [name, url, handleReplace]);
 
   return (
     <div className="card">
-      <img src={image} alt={name} />
+      {image ? <img src={image} alt={name} /> : <p>Loading...</p>}
     </div>
   );
 }
@@ -83,10 +83,22 @@ function App() {
     setPokemon(randomPokemon);
   }, []);
 
+  function replacePokemon(name) {
+    const currentPokemon = new Set(pokemon.map((p) => p.name));
+    const available = resourceList.filter((p) => !currentPokemon.has(p.name));
+    const [replacement] = getRandomItemsFromArray(available, 1);
+    setPokemon((prev) => prev.map((p) => (p.name === name ? replacement : p)));
+  }
+
   return (
     <div className="pokemon-cards">
       {pokemon.map(({ name, url }) => (
-        <Card key={name} name={name} url={url} />
+        <Card
+          key={name}
+          name={name}
+          url={url}
+          handleReplace={() => replacePokemon(name)}
+        />
       ))}
     </div>
   );
