@@ -13,18 +13,43 @@ if (!sessionStorage.getItem("resourceList")) {
 
 const resourceList = JSON.parse(sessionStorage.getItem("resourceList"));
 
-function Card() {
+function getRandomItemsFromArray(array, count = 10) {
+  const result = [];
+  const arr = [...array];
+
+  for (let i = 0; i < count; i++) {
+    const j = i + Math.floor(Math.random() * (arr.length - i));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    result.push(arr[i]);
+  }
+
+  return result;
+}
+
+function Card({ name, url }) {
   // TODO...
   return (
     <div className="card">
-      <img src="" alt="" />
+      <img src="" alt={name} />
     </div>
   );
 }
 
 function App() {
-  // TODO...
-  return <div className="pokemon-cards"></div>;
+  const [pokemon, setPokemon] = useState([]);
+
+  useEffect(() => {
+    const randomPokemon = getRandomItemsFromArray(resourceList, 10);
+    setPokemon(randomPokemon);
+  }, []);
+
+  return (
+    <div className="pokemon-cards">
+      {pokemon.map(({ name, url }) => (
+        <Card key={name} url={url} />
+      ))}
+    </div>
+  );
 }
 
 export default App;
