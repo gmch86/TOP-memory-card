@@ -33,6 +33,13 @@ function Card({ name, url }) {
     let ignore = false;
 
     async function fetchImage() {
+      // Check localStorage first
+      const cached = localStorage.getItem(`pokemonImage-${name}`);
+      if (cached) {
+        setImage(cached);
+        return;
+      }
+
       try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -46,6 +53,7 @@ function Card({ name, url }) {
           console.error("No image found. Replacing pokemon...");
           // TODO...
         } else if (!ignore) {
+          localStorage.setItem(`pokemonImage-${name}`, image);
           setImage(image);
         }
       } catch (error) {
@@ -58,7 +66,7 @@ function Card({ name, url }) {
     return () => {
       ignore = true;
     };
-  }, [url]);
+  }, [name, url]);
 
   return (
     <div className="card">
@@ -78,7 +86,7 @@ function App() {
   return (
     <div className="pokemon-cards">
       {pokemon.map(({ name, url }) => (
-        <Card key={name} url={url} />
+        <Card key={name} name={name} url={url} />
       ))}
     </div>
   );
