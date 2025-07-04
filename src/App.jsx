@@ -120,17 +120,36 @@ function App() {
     setPokemon(getRandomItemsFromArray(pokemon));
   }
 
+  function resetGame() {
+    setScore(0);
+    setBestScore(0);
+    setHistory([]);
+    setPokemon(getRandomItemsFromArray(resourceList, 10));
+  }
+
   return (
-    <div className="pokemon-cards">
-      {pokemon.map(({ name, url }) => (
-        <Card
-          key={name}
-          name={name}
-          url={url}
-          handleReplace={() => replacePokemon(name)}
-          handleShuffle={() => shufflePokemon(name)}
-        />
-      ))}
+    <div className="app-container">
+      <div className="scoreboard">
+        <p>
+          Score: <strong>{score}</strong>
+        </p>
+        <p>
+          Best Score: <strong>{bestScore}</strong>
+        </p>
+        <button onClick={resetGame}>Reset Game</button>
+      </div>
+
+      <div className="pokemon-cards">
+        {pokemon.map(({ name, url }) => (
+          <Card
+            key={name}
+            name={name}
+            url={url}
+            handleReplace={() => replacePokemon(name)}
+            handleShuffle={() => shufflePokemon(name)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
