@@ -1,18 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
-// Fetch pokemon resource list
-if (!localStorage.getItem("resourceList")) {
-  console.log("Fetching pokemon data...");
-  await fetch("https://pokeapi.co/api/v2/pokemon?limit=-1")
-    .then((res) => res.json())
-    .then(({ results }) => {
-      localStorage.setItem("resourceList", JSON.stringify(results));
-    });
-}
-
-const resourceList = JSON.parse(localStorage.getItem("resourceList"));
-
 function getRandomItemsFromArray(array, count = 10) {
   const result = [];
   const arr = [...array];
@@ -76,15 +64,39 @@ function Card({ name, url, handleReplace, handleShuffle }) {
 }
 
 function App() {
+  const [resourceList, setResourceList] = useState([]);
   const [pokemon, setPokemon] = useState([]);
   const [history, setHistory] = useState([]);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
 
   useEffect(() => {
-    const randomPokemon = getRandomItemsFromArray(resourceList, 10);
-    setPokemon(randomPokemon);
+    async function loadPokemonList() {
+      const cached = localStorage.getItem("resourceList");
+      if (cached) {
+        setResourceList(JSON.parse(cached));
+        return;
+      }
+
+      try {
+        const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=-1");
+        const json = await res.json();
+        localStorage.setItem("resourceList", JSON.stringify(json.results));
+        setResourceList(json.results);
+      } catch (error) {
+        console.error("Failed to fetch resource list:", error);
+      }
+    }
+
+    loadPokemonList();
   }, []);
+
+  useEffect(() => {
+    if (resourceList.length > 0) {
+      const randomPokemon = getRandomItemsFromArray(resourceList, 10);
+      setPokemon(randomPokemon);
+    }
+  }, [resourceList]);
 
   function replacePokemon(name) {
     const currentPokemon = new Set(pokemon.map((p) => p.name));
